@@ -1,0 +1,148 @@
+worker_processes 1;
+
+events { worker_connections 1024; }
+
+http {
+
+    sendfile on;
+    large_client_header_buffers 4 32k;
+
+    proxy_read_timeout 1000;
+    proxy_connect_timeout 300;
+    proxy_send_timeout 300;
+
+    server {
+        listen 8443;
+        server_name WireMe;
+
+        location /wireme-service-admin/api/core {
+            proxy_pass         http://wireme-core-peoples:8502/api/core;
+            proxy_redirect     off;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection keep-alive;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_buffer_size           128k;
+            proxy_buffers               4 256k;
+            proxy_busy_buffers_size     256k;
+        }
+
+        location /wireme-service-pos/api/core {
+            proxy_pass         http://wireme-core-peoples:8502/api/core;
+            proxy_redirect     off;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection keep-alive;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_buffer_size           128k;
+            proxy_buffers               4 256k;
+            proxy_busy_buffers_size     256k;
+        }
+
+        location /wireme-service-merchant/api/core {
+            proxy_pass         http://wireme-core-peoples:8502/api/core;
+            proxy_redirect     off;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection keep-alive;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_buffer_size           128k;
+            proxy_buffers               4 256k;
+            proxy_busy_buffers_size     256k;
+        }
+
+
+        location /wireme-service-admin/api/push {
+            proxy_pass         http://pushnotification-server-peoples:9595/api/push;
+            proxy_redirect     off;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection keep-alive;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_buffer_size           128k;
+            proxy_buffers               4 256k;
+            proxy_busy_buffers_size     256k;
+        }
+
+        location /wireme-service-pos/api/push {
+            proxy_pass         http://pushnotification-server-peoples:9595/api/push;
+            proxy_redirect     off;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection keep-alive;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_buffer_size           128k;
+            proxy_buffers               4 256k;
+            proxy_busy_buffers_size     256k;
+        }
+
+        location /wireme/* {
+            proxy_pass         http://admin-portal:3000/wireme/app/login-page;
+            proxy_redirect     off;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection keep-alive;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_buffer_size           128k;
+            proxy_buffers               4 256k;
+            proxy_busy_buffers_size     256k;
+        }
+
+        location /wireme-merchant/* {
+            proxy_pass         http://merchant-portal:3001/wireme-merchant/app/login-page;
+            proxy_redirect     off;
+            proxy_http_version 1.1;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header   Upgrade $http_upgrade;
+            proxy_set_header   Connection keep-alive;
+            proxy_set_header   Host $host;
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   X-Forwarded-Proto $scheme;
+            proxy_set_header   X-Forwarded-Host $server_name;
+            proxy_buffer_size           128k;
+            proxy_buffers               4 256k;
+            proxy_busy_buffers_size     256k;
+        }
+
+        location /files {
+            alias /usr/share/nginx/html/files;
+            autoindex on;
+            allow all;
+        }
+
+    }
+
+
+}
+
