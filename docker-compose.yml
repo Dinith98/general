@@ -1,0 +1,196 @@
+version: "3.7"
+
+services:
+  reverse-proxy-uat:
+    depends_on:
+      - wireme-core-peoples
+    image: cbaitd/nginx-peoples-test:v1.0.0
+    ports:
+      - 80:80
+    networks:
+      - wireme-core-ca-network-peoples
+    restart: always
+    container_name: "peoples-proxy-ca-uat"
+    volumes:
+      - /home/cba/wireme/peoples/logs/wireme/images:/usr/share/nginx/html/images
+
+  wireme-core-peoples:
+    image: cbaitd/wireme-core-ca-pbc:v1.0.1_20250325_INTERNAL
+    volumes:
+      - /home/cba/wireme/peoples/logs/core:/logs
+      - /home/cba/wireme/peoples/logs/reports:/home/reports
+      - /home/cba/wireme/peoples/logs/migrations:/home/migrations
+      - /home/cba/wireme/peoples/etc/localtime:/etc/localtime:ro
+      - /home/cba/wireme/peoples/etc/timezone/:/etc/timezone:ro
+    env_file:
+      - .env
+    environment:
+      - FROM_DOCKER=1
+      - NODE_ENV=development
+      - JWT_EXPIRES_IN=2h
+      - DB_TYPE=oracle
+      - DB_HOST=124.43.71.173
+      - DB_PORT=1521
+      - DB_UNAME=PBC_WIREME_UAT
+      - DB_PWORD=tEAw+UZ0NGmVfHOhdF+KxkTIrL/pqJfV
+      - DB_SID=orcl
+      - LOG_PORT=24224
+      - LOG_HOST=123.231.95.112
+      - AOER_PORT=9090
+      - AOER_HOST=aoer-service
+        # - TZ=Asia/Colombo
+      - MYSQL_ROOT_HOST='%'
+      - SMS_HOST=172.20.8.163
+      - SMS_PORT=9090
+      - EMAIL_HOST=172.24.2.26
+      - EMAIL_PORT=25
+      - EMAIL_UNAME=wiremetest@boc.lk
+      - EMAIL_PWORD=wiremetest12
+      - EMAIL_SECURED=false
+      - EMAIL_TLS=true
+      - EMAIL_SERVICE_HOST=email-service
+      - EMAIL_SERVICE_PORT=9091
+      - LOG_FILE_PATH=/logs
+      - FILE_EXPORT_SERVICE_DIRECTORY=/home/reports
+      - RULE_ENGINE_HOST=124.43.71.173
+      - RULE_ENGINE_PORT=28080
+      - MIGRATION_DIRECTORY=/home
+      - RESOURCE_ACTIVATION_CRON=0 0 * * *
+      - DB_TZ=Asia/Colombo
+      - MOMENT_TZ=Asia/Colombo
+      - AD_ENABLED=false
+      - AD_CONFIG_URL=ldap://uatad.bank.net
+      - AD_CONFIG_PORT=389
+      - AD_CONFIG_DOMAIN=UATAD
+      - AD_CONFIG_BASEDN=DC=UATAD,DC=ITRD
+      - FILE_UPLOAD_DIR=/files/uploads/
+      - NOTIFICATION_SERVICE_HOST=notification-service
+      - NOTIFICATION_SERVICE_PORT=7575
+      - ADMIN_PORTAL_HIGHLIGHT_COUNT=RnjfpakhuUhhtM1RhCpQnQ==
+      - ADMIN_PORTAL_GRAPH_COUNT=6L3xx5O6rTxAFeY8Rmbakw==
+      - MERCHANT_PORTAL_HIGHLIGHT_COUNT=1K53x2VZJz+ky8gXLGd0YA==
+      - MERCHANT_PORTAL_GRAPH_COUNT=mSuYUx1sdD6cZstsw2kg1A==
+    container_name: "wireme-core-peoples"
+    networks:
+      - wireme-core-ca-network-peoples
+    ports:
+      - "8502:8502"
+    restart: always
+
+
+  pushnotification-server-peoples:
+    image: cbaitd/push-notification-pb:v1.0.0-internal
+    container_name: pushnotification-server-peoples
+    restart: always
+    volumes:
+      - /home/cba/wireme/peoples/logs/push/:/home/logs/PushService
+      - /home/cba/wireme/peoples/logs/images/banners:/images/banners
+    environment:
+      - DB_HOST=124.43.71.173
+      - DB_PORT=1521
+      - DB_USER=PBC_WIREME_UAT
+      - DB_PASSWORD=password
+      - DB_NAME=orcl
+      - SIGNATURE_SYNQ_SERVICE=wireme-core-peoples:8502
+      - DEVICEINFO_SYNQ_SERVICE=aoer-service:9090
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@124.43.71.173:1521:orcl
+      - CBA_GETDEVICEINFOENDPOINT=http://aoer-service:9090/api/aoer/v1/device-status
+      - TZ=Asia/Colombo
+      - BANNER_LOCATION=/home/cba/wireme/images/banners
+      - BANNER_URL_PREFIX=http://124.43.80.236:8443/home/cba/wireme/images/banners
+      - BANNER_URL_WEB_PREFIX=http://124.43.80.236:8443/home/cba/wireme/images/banners
+      - IS_URL_BASED=TRUE
+    ports:
+      - "9595:9595"
+    networks:
+      - wireme-core-ca-network-peoples
+
+
+
+  file-export-service:
+    image: cbaitd/wireme-file-export-service-webx:v1.0.1_internal
+    container_name: file-export-service-peoples
+    restart: always
+    volumes:
+      - /home/cba/wireme/peoples/logs/reports:/home/reports
+      - /home/cba/wireme/peoples/logs/file-export:/home/logs/FileExportService
+    environment:
+      - DB_HOST=124.43.71.173
+      - DB_PORT=1521
+      - DB_USER=PBC_WIREME_UAT
+      - DB_PASSWORD=password
+      - DB_NAME=orcl
+      - CLEANUP_DIRECTORY=/home/reports
+      - CLEANUP_PERIOD=1
+      - CLEANUP_CRON=0 30 01 * * ?
+      - FILE_EXPORT_CRON=0 * * * * ?
+      - TZ=Asia/Colombo
+    ports:
+      - "9797:9797"
+    networks:
+      - wireme-core-ca-network-peoples
+
+  notification-service:
+    image: cbaitd/notification-service-pb:v1.0.0-internal
+    container_name: notification-service-peoples
+    ports:
+      - "7576:7575"
+      - "5672:5672" # RabbitMQ AMQP port
+      - "15672:15672" # RabbitMQ management UI port
+    restart: always
+    volumes:
+      - /home/cba/wireme/peoples/logs/notification-server:/logs
+    environment:
+      - DB_HOST=124.43.71.173
+      - DB_PORT=1521
+      - DB_USER=PBC_WIREME_UAT
+      - DB_PASSWORD=password
+      - DB_NAME=orcl
+      - DDL_AUTO_METHOD=none
+      - SENDER_EMAIL_ADDRESS=cbadev2021@gmail.com
+      - DIALOG_SMS_API_USERNAME=webxadmin
+      - DIALOG_SMS_API_PASSWORD=ENC(BWyx8zkEbizuaq9CGFOC/TM5oOwdHyyB)
+      - HUTCH_SMS_API_USERNAME=harshaka.ratnapala@webxpay.com
+      - HUTCH_SMS_API_PASSWORD=ENC(H3DD4LNNxKcF5gz/wpb1p5x2SEstRIDx)
+      - RABBIT_MQ_HOST=localhost
+      - RABBIT_MQ_PORT=5672
+      - DIALOG_SMS_LOGIN=https://esms.dialog.lk/api/v2/user/login
+      - DIALOG_SMS_ENDPOINT=https://e-sms.dialog.lk/api/v2/sms
+      - HUTCH_SMS_LOGIN=https://bsms.hutch.lk/api/login
+      - HUTCH_SMS_ENDPOINT=https://bsms.hutch.lk/api/sendsms
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - MAIL_ACCOUNT_USERNAME=cbadev2021@gmail.com
+      - MAIL_ACCOUNT_PASSWORD=ENC(OuzomyDTuzNLrKU3107/jaGenMO/JxZAY7OsBk1FeWc=)
+      - BANK_LOGO=${logo}
+
+    networks:
+      - wireme-core-ca-network-peoples
+
+  admin-portal:
+    image: cbaitd/dev:PB_A_V1.0.0_INTERNAL
+    container_name: peoples_admin_portal
+    restart: always
+    ports:
+      - "3000:80"
+    networks:
+      - wireme-core-ca-network-peoples
+    environment:
+      - BASE_URL=http://192.168.102.9:80
+      - APP_CODE=f62b2d4d-ad05-4513-8041-861eff04f5b0
+
+  merchant-portal:
+    image: cbaitd/dev:WEBXPAY_M_V1.0.0
+    container_name: peoples_merchant_portal
+    restart: always
+    ports:
+      - "3001:80"
+    networks:
+      - wireme-core-ca-network-peoples
+    environment:
+      - BASE_URL=http://192.168.102.9:80
+      - APP_CODE=f62b2d4d-ad05-4513-8041-861eff04f5b0
+
+networks:
+  wireme-core-ca-network-peoples:
+    name: wireme-core-ca-network-peoples
