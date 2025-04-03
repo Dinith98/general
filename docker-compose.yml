@@ -99,8 +99,8 @@ services:
     container_name: file-export-service-peoples
     restart: always
     volumes:
-      - /home/cba/wireme/peoples/logs/reports:/home/reports
-      - /home/cba/wireme/peoples/logs/file-export:/home/logs/FileExportService
+      - /home/wmadmin/cba/wireme/logs/reports:/home/reports
+      - /home/wmadmin/cba/wireme/logs/file-export:/home/logs/FileExportService
     environment:
       - DB_HOST=172.19.106.5
       - DB_PORT=1521
@@ -126,7 +126,7 @@ services:
       - "15672:15672" # RabbitMQ management UI port
     restart: always
     volumes:
-      - /home/cba/wireme/peoples/logs/notification-server:/logs
+      - /home/wmadmin/cba/wireme/logs/notification-server:/logs
     environment:
       - DB_HOST=172.19.106.5
       - DB_PORT=1521
@@ -150,33 +150,9 @@ services:
       - MAIL_ACCOUNT_USERNAME=cbadev2021@gmail.com
       - MAIL_ACCOUNT_PASSWORD=ENC(OuzomyDTuzNLrKU3107/jaGenMO/JxZAY7OsBk1FeWc=)
       - BANK_LOGO=${logo}
-
     networks:
       - wireme-core-ca-network-peoples
 
-  admin-portal:
-    image: cbaitd/dev:PB_A_V1.0.0_INTERNAL
-    container_name: peoples_admin_portal
-    restart: always
-    ports:
-      - "3000:80"
-    networks:
-      - wireme-core-ca-network-peoples
-    environment:
-      - BASE_URL=http://192.168.102.9:80
-      - APP_CODE=f62b2d4d-ad05-4513-8041-861eff04f5b0
-
-  merchant-portal:
-    image: cbaitd/dev:WEBXPAY_M_V1.0.0
-    container_name: peoples_merchant_portal
-    restart: always
-    ports:
-      - "3001:80"
-    networks:
-      - wireme-core-ca-network-peoples
-    environment:
-      - BASE_URL=http://192.168.102.9:80
-      - APP_CODE=f62b2d4d-ad05-4513-8041-861eff04f5b0
 
 networks:
   wireme-core-ca-network-peoples:
