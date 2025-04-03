@@ -1,27 +1,14 @@
 version: "3.7"
 
 services:
-  reverse-proxy-uat:
-    depends_on:
-      - wireme-core-peoples
-    image: cbaitd/nginx-peoples-test:v1.0.0
-    ports:
-      - 80:80
-    networks:
-      - wireme-core-ca-network-peoples
-    restart: always
-    container_name: "peoples-proxy-ca-uat"
-    volumes:
-      - /home/cba/wireme/peoples/logs/wireme/images:/usr/share/nginx/html/images
-
   wireme-core-peoples:
     image: cbaitd/wireme-core-ca-pbc:v1.0.1_20250325_INTERNAL
     volumes:
-      - /home/cba/wireme/peoples/logs/core:/logs
-      - /home/cba/wireme/peoples/logs/reports:/home/reports
-      - /home/cba/wireme/peoples/logs/migrations:/home/migrations
-      - /home/cba/wireme/peoples/etc/localtime:/etc/localtime:ro
-      - /home/cba/wireme/peoples/etc/timezone/:/etc/timezone:ro
+      - /home/wmadmin/cba/wireme/logs/core:/logs
+      - /home/wmadmin/cba/wireme/reports:/home/reports
+      - /home/wmadmin/cba/wireme/migrations:/home/migrations
+      - /home/wmadmin/cba/wireme/logs/localtime:/etc/localtime:ro
+      - /home/wmadmin/cba/wireme/logs/timezone/:/etc/timezone:ro
     env_file:
       - .env
     environment:
@@ -29,11 +16,11 @@ services:
       - NODE_ENV=development
       - JWT_EXPIRES_IN=2h
       - DB_TYPE=oracle
-      - DB_HOST=124.43.71.173
+      - DB_HOST=172.19.106.5
       - DB_PORT=1521
       - DB_UNAME=PBC_WIREME_UAT
       - DB_PWORD=tEAw+UZ0NGmVfHOhdF+KxkTIrL/pqJfV
-      - DB_SID=orcl
+      - DB_SERVICE_NAME=WIREMEUAT
       - LOG_PORT=24224
       - LOG_HOST=123.231.95.112
       - AOER_PORT=9090
@@ -83,22 +70,22 @@ services:
     container_name: pushnotification-server-peoples
     restart: always
     volumes:
-      - /home/cba/wireme/peoples/logs/push/:/home/logs/PushService
-      - /home/cba/wireme/peoples/logs/images/banners:/images/banners
+      - /home/wmadmin/cba/wireme/logs/push/:/home/logs/PushService
+      - /home/wmadmin/cba/wireme/images/banners:/images/banners
     environment:
-      - DB_HOST=124.43.71.173
+      - DB_HOST=172.19.106.5
       - DB_PORT=1521
       - DB_USER=PBC_WIREME_UAT
       - DB_PASSWORD=password
-      - DB_NAME=orcl
+      - DB_NAME=WIREMEUAT
       - SIGNATURE_SYNQ_SERVICE=wireme-core-peoples:8502
       - DEVICEINFO_SYNQ_SERVICE=aoer-service:9090
-      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@124.43.71.173:1521:orcl
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@172.19.106.5:1521:WIREMEUAT
       - CBA_GETDEVICEINFOENDPOINT=http://aoer-service:9090/api/aoer/v1/device-status
       - TZ=Asia/Colombo
-      - BANNER_LOCATION=/home/cba/wireme/images/banners
-      - BANNER_URL_PREFIX=http://124.43.80.236:8443/home/cba/wireme/images/banners
-      - BANNER_URL_WEB_PREFIX=http://124.43.80.236:8443/home/cba/wireme/images/banners
+      - BANNER_LOCATION=/home/wmadmin/cba/wireme/images/banners
+      - BANNER_URL_PREFIX=http://172.18.125.56:8443/home/wmadmin/cba/wireme/images/banners
+      - BANNER_URL_WEB_PREFIX=http://172.18.125.56:8443/home/cba/wireme/images/banners
       - IS_URL_BASED=TRUE
     ports:
       - "9595:9595"
